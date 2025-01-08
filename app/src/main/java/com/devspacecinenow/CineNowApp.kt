@@ -6,15 +6,20 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.devspacecinenow.List.presentation.MovieListViewModel
 import com.devspacecinenow.List.presentation.ui.MovieListScreen
-import com.devspacecinenow.detail.presentation.MovieDetailScreen
+import com.devspacecinenow.detail.presentation.MovieDetailViewModel
+import com.devspacecinenow.detail.presentation.ui.MovieDetailScreen
 
 @Composable
-fun CineNowApp() {
+fun CineNowApp(
+    listViewModel: MovieListViewModel,
+    detailViewModel: MovieDetailViewModel
+) {
     val navControler = rememberNavController()
     NavHost(navController = navControler, startDestination = "movieList"){
         composable(route = "movieList"){
-            MovieListScreen(navControler)
+            MovieListScreen(navControler, listViewModel)
         }
         composable(
             route = "movieDetail" + "/{itemId}",
@@ -23,7 +28,7 @@ fun CineNowApp() {
             })
         ){backStrackEntry ->
             val movieId = requireNotNull(backStrackEntry.arguments?.getString("itemId"))
-            MovieDetailScreen(movieId, navControler)
+            MovieDetailScreen(movieId, navControler, detailViewModel)
         }
     }
 }
