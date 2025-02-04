@@ -1,6 +1,5 @@
 package com.devspacecinenow.List.presentation.ui
 
-
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -20,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.devspacecinenow.List.presentation.MovieListViewModel
-import com.devspacecinenow.common.model.MovieDto
+
 
 
 @Composable
@@ -48,18 +48,16 @@ fun MovieListScreen(
         upComingMovies = upComingMovies
     ) { itemClicked ->
         navControler.navigate(route = "movieDetail/${itemClicked.id}")
-
     }
-
 }
 
 @Composable
 private fun MovieListContent(
-    popularMovies: List<MovieDto>,
-    topRatedMovies: List<MovieDto>,
-    nowPlayingMovies: List<MovieDto>,
-    upComingMovies: List<MovieDto>,
-    onClick: (MovieDto) -> Unit
+    popularMovies: MovieListUIState,
+    topRatedMovies: MovieListUIState,
+    nowPlayingMovies: MovieListUIState,
+    upComingMovies: MovieListUIState,
+    onClick: (MovieUIData) -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -74,26 +72,26 @@ private fun MovieListContent(
         )
         MovieSession(
             label = "Popular",
-            movieList = popularMovies,
+            movieListUIState = popularMovies,
             onClick = onClick
         )
 
 
         MovieSession(
             label = "Top rated",
-            movieList = topRatedMovies,
+            movieListUIState = topRatedMovies,
             onClick = onClick
         )
 
         MovieSession(
             label = "Now Playing",
-            movieList = nowPlayingMovies,
+            movieListUIState = nowPlayingMovies,
             onClick = onClick
         )
 
         MovieSession(
             label = "Upcoming",
-            movieList = upComingMovies,
+            movieListUIState = upComingMovies,
             onClick = onClick
         )
     }
@@ -103,9 +101,10 @@ private fun MovieListContent(
 @Composable
 private fun MovieSession(
     label: String,
-    movieList: List<MovieDto>,
-    onClick: (MovieDto) -> Unit
+    movieListUIState: MovieListUIState,
+    onClick: (MovieUIData) -> Unit
 ) {
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -117,7 +116,17 @@ private fun MovieSession(
             fontWeight = FontWeight.SemiBold
         )
         Spacer(modifier = Modifier.size(8.dp))
-        MovieList(movieList = movieList, onClick = onClick)
+        if (movieListUIState.isLoading) {
+
+        } else if (movieListUIState.isError) {
+            Text(
+                color = Color.Red,
+                text = movieListUIState.errorMessage ?: "",
+            )
+
+        } else {
+            MovieList(movieList = movieListUIState.list, onClick = onClick)
+        }
 
     }
 
@@ -125,8 +134,8 @@ private fun MovieSession(
 
 @Composable
 private fun MovieList(
-    movieList: List<MovieDto>,
-    onClick: (MovieDto) -> Unit
+    movieList: List<MovieUIData>,
+    onClick: (MovieUIData) -> Unit
 ) {
     LazyRow {
         items(movieList) {
@@ -140,8 +149,8 @@ private fun MovieList(
 
 @Composable
 private fun MovieItem(
-    movieDto: MovieDto,
-    onClick: (MovieDto) -> Unit
+    movieDto: MovieUIData,
+    onClick: (MovieUIData) -> Unit
 
 ) {
     Column(
@@ -157,7 +166,7 @@ private fun MovieItem(
                 .width(120.dp)
                 .height(150.dp),
             contentScale = ContentScale.Crop,
-            model = movieDto.posterFullPath,
+            model = movieDto.image,
             contentDescription = "${movieDto.title}Poster image"
         )
         Spacer(modifier = Modifier.size(4.dp))
